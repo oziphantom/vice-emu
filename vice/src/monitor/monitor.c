@@ -551,6 +551,22 @@ void monitor_cpu_type_set(const char *cpu_type)
     }
 }
 
+int mon_banknum_from_bank(MEMSPACE mem, const char *bankname)
+{
+   if (mem == e_default_space) {
+        mem = default_memspace;
+    }
+
+    int newbank;
+
+    newbank = mon_interfaces[mem]->mem_bank_from_name(bankname);
+    if (newbank < 0) {
+        mon_out("Unknown bank name `%s'\n", bankname);
+        return 0;
+     }
+    return newbank;
+}
+
 void mon_bank(MEMSPACE mem, const char *bankname)
 {
     if (mem == e_default_space) {
@@ -587,7 +603,7 @@ void mon_bank(MEMSPACE mem, const char *bankname)
     }
 }
 
-const char *mon_get_current_bank_name(MEMSPACE mem)
+const char *mon_get_bank_name_for_bank(MEMSPACE mem, int banknum)
 {
     const char **bnp = NULL;
 
@@ -597,12 +613,16 @@ const char *mon_get_current_bank_name(MEMSPACE mem)
 
     bnp = mon_interfaces[mem]->mem_bank_list();
     while (*bnp) {
-        if (mon_interfaces[mem]->mem_bank_from_name(*bnp) == mon_interfaces[mem]->current_bank) {
+        if (mon_interfaces[mem]->mem_bank_from_name(*bnp) == banknum) {
             return *bnp;
         }
         bnp++;
     }
     return NULL;
+}
+const char *mon_get_current_bank_name(MEMSPACE mem)
+{
+    return mon_get_bank_name_for_bank(mem, mon_interfaces[mem]->current_bank);
 }
 
 /*
@@ -1191,7 +1211,7 @@ static const resource_int_t resources_int[] = {
     { "KeepMonitorOpen", 1, RES_EVENT_NO, NULL,
       &keep_monitor_open, set_keep_monitor_open, NULL },
 #endif
-    RESOURCE_INT_LIST_END
+    { NULL }
 };
 
 int monitor_resources_init(void)
@@ -1232,7 +1252,7 @@ static const cmdline_option_t cmdline_options[] = {
       IDCLS_UNUSED, IDCLS_DISABLE_KEEP_MONITOR_OPEN,
       NULL, NULL },
 #endif
-    CMDLINE_LIST_END
+    { NULL }
 };
 
 int monitor_cmdline_options_init(void)
@@ -1844,6 +1864,9 @@ void mon_print_conditional(cond_node_t *cnode)
     } else {
         if (cnode->is_reg) {
             mon_out("%s", register_string[reg_regid(cnode->reg_num)]);
+        }
+        else if (cnode->banknum >= 0) {
+            mon_out("@:%s:$%04x", mon_get_bank_name_for_bank(default_memspace,cnode->banknum), cnode->value);
         } else {
             mon_out("$%02x", cnode->value);
         }
@@ -1863,33 +1886,33 @@ int mon_evaluate_conditional(cond_node_t *cnode)
             log_error(LOG_ERR, "No conditional!");
             return 0;
         }
-        mon_evaluate_conditional(cnode->child1);
-        mon_evaluate_conditional(cnode->child2);
+        int value_1 = mon_evaluate_conditional(cnode->child1);
+        int value_2 = mon_evaluate_conditional(cnode->child2);
 
         switch (cnode->operation) {
             case e_EQU:
-                cnode->value = ((cnode->child1->value) == (cnode->child2->value));
+                cnode->value = (value_1 == value_2);
                 break;
             case e_NEQ:
-                cnode->value = ((cnode->child1->value) != (cnode->child2->value));
+                cnode->value = (value_1 != value_2);
                 break;
             case e_GT:
-                cnode->value = ((cnode->child1->value) > (cnode->child2->value));
+                cnode->value = (value_1 > value_2);
                 break;
             case e_LT:
-                cnode->value = ((cnode->child1->value) < (cnode->child2->value));
+                cnode->value = (value_1 < value_2);
                 break;
             case e_GTE:
-                cnode->value = ((cnode->child1->value) >= (cnode->child2->value));
+                cnode->value = (value_1 >= value_2);
                 break;
             case e_LTE:
-                cnode->value = ((cnode->child1->value) <= (cnode->child2->value));
+                cnode->value = (value_1 <= value_2);
                 break;
             case e_AND:
-                cnode->value = ((cnode->child1->value) && (cnode->child2->value));
+                cnode->value = (value_1 && value_2);
                 break;
             case e_OR:
-                cnode->value = ((cnode->child1->value) || (cnode->child2->value));
+                cnode->value = (value_1 || value_2);
                 break;
             default:
                 log_error(LOG_ERR, "Unexpected conditional operator: %d\n",
@@ -1901,6 +1924,14 @@ int mon_evaluate_conditional(cond_node_t *cnode)
             cnode->value = (monitor_cpu_for_memspace[reg_memspace(cnode->reg_num)]->mon_register_get_val)
                                (reg_memspace(cnode->reg_num),
                                reg_regid(cnode->reg_num));
+        }
+        else if(cnode->banknum >= 0) {
+            MEMSPACE src_mem = e_comp_space;
+            WORD start = addr_location(cnode->value);
+
+            BYTE byte1 = mon_get_mem_val_ex(src_mem, cnode->banknum, start);
+
+            return byte1;
         }
     }
 
