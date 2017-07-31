@@ -63,7 +63,8 @@ static void vdc_write_data(void)
     ptr = (vdc.regs[18] << 8) + vdc.regs[19];
 
     /* Write data byte to update address. */
-    vdc.ram[ptr & vdc.vdc_address_mask] = vdc.regs[31];
+    //vdc.ram[ptr & vdc.vdc_address_mask] = vdc.regs[31];
+    vdc_ram_store(ptr,vdc.regs[31]);
 #ifdef REG_DEBUG
     log_message(vdc.log, "STORE %04x %02x", ptr & vdc.vdc_address_mask,
                 vdc.regs[31]);
@@ -90,11 +91,12 @@ static void vdc_perform_fillcopy(void)
         /* Block start address.  */
         ptr2 = (vdc.regs[32] << 8) + vdc.regs[33];
         for (i = 0; i < blklen; i++) {
-            vdc.ram[(ptr + i) & vdc.vdc_address_mask]
-                = vdc.ram[(ptr2 + i) & vdc.vdc_address_mask];
+            /*vdc.ram[(ptr + i) & vdc.vdc_address_mask]
+                = vdc.ram[(ptr2 + i) & vdc.vdc_address_mask];*/
+            vdc_ram_store((ptr + i), vdc_ram_read(ptr2 + i));
         }
         ptr2 += blklen;
-        vdc.regs[31] = vdc.ram[(ptr2 - 1) & vdc.vdc_address_mask];
+        vdc.regs[31] = vdc_ram_read(ptr2 - 1);/*vdc.ram[(ptr2 - 1) & vdc.vdc_address_mask];*/
         vdc.regs[32] = (ptr2 >> 8) & 0xff;
         vdc.regs[33] = ptr2 & 0xff;
     } else { /* FILL */
@@ -103,7 +105,8 @@ static void vdc_perform_fillcopy(void)
                     ptr, blklen, vdc.regs[31]);
 #endif
         for (i = 0; i < blklen; i++) {
-            vdc.ram[(ptr + i) & vdc.vdc_address_mask] = vdc.regs[31];
+            /*vdc.ram[(ptr + i) & vdc.vdc_address_mask] = vdc.regs[31];*/
+            vdc_ram_store(ptr + i, vdc.regs[31]);
         }
     }
 
@@ -424,6 +427,11 @@ void vdc_store(WORD addr, BYTE value)
             break;
 
         case 28:
+            if( vdc.regs[28] & 0x8 ){
+                vdc.vdc_address_mask = 0xFFFF; // 64K RAM
+            } else {
+                vdc.vdc_address_mask = 0x3FFF; // 16K RAM
+            }    
             vdc.chargen_adr = ((vdc.regs[28] << 8) & 0xe000) & vdc.vdc_address_mask;
 #ifdef REG_DEBUG
             log_message(vdc.log, "Update chargen_adr: %x.", vdc.chargen_adr);
@@ -480,7 +488,7 @@ BYTE vdc_read(WORD addr)
         /*log_message(vdc.log, "read: addr = %x", addr);*/
 
         if (vdc.update_reg == 31) {
-            retval = vdc.ram[((vdc.regs[18] << 8) + vdc.regs[19]) & vdc.vdc_address_mask];
+            retval = vdc_ram_read((vdc.regs[18] << 8) + vdc.regs[19]);//ram[((vdc.regs[18] << 8) + vdc.regs[19]) & vdc.vdc_address_mask];
             ptr = (1 + vdc.regs[19] + (vdc.regs[18] << 8))
                   & vdc.vdc_address_mask;
             vdc.regs[18] = (ptr >> 8) & 0xff;
@@ -532,7 +540,8 @@ BYTE vdc_peek(WORD addr)    /* No sidefx read of external VDC registers */
 
         /* Read VDCs RAM without incrementing the pointer */
         if (vdc.update_reg == 31) {
-            return vdc.ram[((vdc.regs[18] << 8) + vdc.regs[19]) & vdc.vdc_address_mask];
+            //return vdc.ram[((vdc.regs[18] << 8) + vdc.regs[19]) & vdc.vdc_address_mask];
+            vdc_ram_read((vdc.regs[18] << 8) + vdc.regs[19]);
         }
 
         /* Make sure light pen flag is not altered if either light pen position register is read */
@@ -550,12 +559,26 @@ BYTE vdc_peek(WORD addr)    /* No sidefx read of external VDC registers */
 
 BYTE vdc_ram_read(WORD addr)
 {
-    return vdc.ram[addr & vdc.vdc_address_mask];
+    //if (vdc.regs[28] & 0x8){
+        return vdc.ram[addr & vdc.vdc_address_mask];
+    /*}
+    else {
+        WORD mapped_addr = ((addr << 1) & 0x3f00) | (addr & 0x00FF);
+        return vdc.ram[mapped_addr];
+    }*/
 }
 
 void vdc_ram_store(WORD addr, BYTE value)
 {
-    vdc.ram[addr & vdc.vdc_address_mask] = value;
+    WORD mapped_addr;
+    //if (vdc.regs[28] & 0x8){
+        mapped_addr = addr & vdc.vdc_address_mask;
+    /*}
+    else {
+        mapped_addr = ((addr << 1) & 0x3f00) | (addr & 0x00FF);
+    }*/
+
+    vdc.ram[mapped_addr] = value;
 }
 
 
