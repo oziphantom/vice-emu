@@ -1928,9 +1928,12 @@ int mon_evaluate_conditional(cond_node_t *cnode)
         else if(cnode->banknum >= 0) {
             MEMSPACE src_mem = e_comp_space;
             WORD start = addr_location(cnode->value);
+            int old_sidefx = sidefx; /*we need to store current value*/
+            sidefx = 0; /*make sure we peek when doing the break point, otherwise weird stuff will happen*/
 
             BYTE byte1 = mon_get_mem_val_ex(src_mem, cnode->banknum, start);
 
+            sidefx = old_sidefx; /*restore value*/
             return byte1;
         }
     }
