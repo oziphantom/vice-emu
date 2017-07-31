@@ -89,6 +89,7 @@ typedef struct mem_ioreg_list_s {
     unsigned int next;
     int (*dump)(void *context, WORD address);
     void *context;
+    int(*dissExtra)(void *context, WORD address);
 } mem_ioreg_list_t;
 
 extern mem_ioreg_list_t *mem_ioreg_list_get(void *context);

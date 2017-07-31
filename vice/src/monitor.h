@@ -183,11 +183,12 @@ extern const char *mon_disassemble_to_string(MEMSPACE, unsigned int addr, unsign
                                              unsigned int p1, unsigned int p2, unsigned int p3,
                                              int hex_mode,
                                              const char *cpu_type);
+extern int monitor_dumpExtraDiss();
 
 /** Register interface.  */
 extern struct mon_reg_list_s *mon_register_list_get(int mem);
 extern void mon_ioreg_add_list(struct mem_ioreg_list_s **list, const char *name,
-                               int start, int end, void *dump, void *context);
+                               int start, int end, void *dump, void *context, void *extraDiss);
 
 /* Assembler initialization.  */
 extern void asm6502_init(struct monitor_cpu_type_s *monitor_cpu_type);

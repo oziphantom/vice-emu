@@ -132,6 +132,8 @@
 #include "vizawrite64_dongle.h"
 #include "vsync.h"
 
+#include "core\ciatimer.h"
+
 #ifdef HAVE_MOUSE
 #include "lightpen.h"
 #include "mouse.h"
@@ -227,7 +229,8 @@ static io_source_t vicii_d000_device = {
     vicii_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_HIGH, /* priority, device and mirrors never involved in collisions */
-    0
+    0,
+    vicii_extradiss
 };
 
 static io_source_t vicii_d100_device = {
@@ -242,6 +245,7 @@ static io_source_t vicii_d100_device = {
     vicii_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_HIGH, /* priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -257,6 +261,7 @@ static io_source_t vicii_d200_device = {
     vicii_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_HIGH, /* priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -272,6 +277,7 @@ static io_source_t vicii_d300_device = {
     vicii_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_HIGH, /* priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -287,6 +293,7 @@ static io_source_t sid_d400_device = {
     sid_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_HIGH, /* priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -302,6 +309,7 @@ static io_source_t sid_d420_device = {
     sid_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_LOW, /* low priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -317,6 +325,7 @@ static io_source_t sid_d500_device = {
     sid_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_LOW, /* low priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -332,6 +341,7 @@ static io_source_t sid_d600_device = {
     sid_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_LOW, /* low priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -347,6 +357,7 @@ static io_source_t sid_d700_device = {
     sid_dump,
     0, /* dummy (not a cartridge) */
     IO_PRIO_LOW, /* low priority, device and mirrors never involved in collisions */
+    0,
     0
 };
 
@@ -1069,6 +1080,11 @@ int machine_specific_init(void)
     c64io_init();
 
     gfxoutput_init();
+
+    vicii_setcia1timerAptr(&(machine_context.cia1->ta->cnt));
+    vicii_setcia1timerBptr(&(machine_context.cia1->tb->cnt));
+    vicii_setcia2timerAptr(&(machine_context.cia2->ta->cnt));
+    vicii_setcia2timerBptr(&(machine_context.cia2->tb->cnt));
 
     /* Initialize the C64-specific part of the UI.  */
     if (!console_mode) {

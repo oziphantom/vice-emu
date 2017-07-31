@@ -178,6 +178,7 @@ typedef struct io_source_s {
     int cart_id; /*!< id of associated cartridge */
     int io_source_prio; /*!< 0: normal, 1: higher priority (no collisions), -1: lower priority (no collisions) */
     unsigned int order; /*!< a tag to indicate the order of insertion */
+    int (*dissExtra)(void); /*used to pull out extra info for the dissasembly lines shown in the monitor*/
 } io_source_t;
 
 typedef struct io_source_list_s {

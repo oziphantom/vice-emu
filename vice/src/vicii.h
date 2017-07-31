@@ -94,6 +94,7 @@ extern void vicii_shutdown(void);
 extern void vicii_change_timing(struct machine_timing_s *machine_timing, int border_mode);
 
 extern int vicii_dump(void);
+extern int vicii_extradiss(void);
 
 extern void vicii_snapshot_prepare(void);
 extern int vicii_snapshot_write_module(struct snapshot_s *s);
@@ -119,4 +120,9 @@ extern int vicii_get_half_cycle(void);
 extern void vicii_memory_refresh_alarm_handler(void);
 extern int vicii_check_memory_refresh(CLOCK clock);
 
+/* ozi debug stuff*/
+extern void vicii_setcia1timerAptr(WORD* ptimer);
+extern void vicii_setcia1timerBptr(WORD* ptimer);
+extern void vicii_setcia2timerAptr(WORD* ptimer);
+extern void vicii_setcia2timerBptr(WORD* ptimer);
 #endif

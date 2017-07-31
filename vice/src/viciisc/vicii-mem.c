@@ -41,6 +41,7 @@
 #include "vicii-mem.h"
 #include "vicii.h"
 #include "viciitypes.h"
+#include "c64interuptvisualiser.h"
 
 
 /* Unused bits in VIC-II registers: these are always 1 when read.  */
@@ -176,6 +177,15 @@ inline static void d016_store(const BYTE value)
     VICII_DEBUG_REGISTER(("Control register: $%02X", value));
 
     vicii.regs[0x16] = value;
+    BYTE enable = value & 0xC0;
+    if (enable == 0x80)
+    {
+        irq_visualiser_enable();
+    }
+    else if (enable == 0x40)
+    {
+        irq_viusaliser_disable();
+    }
 }
 
 inline static void d017_store(const BYTE value)
@@ -328,6 +338,13 @@ inline static void sprite_color_store(WORD addr, BYTE value)
     color_reg_store(addr, value);
 }
 
+inline static void debug_d031_store(BYTE value)
+{
+    VICII_DEBUG_REGISTER(("VICE Debug register #0: $%02X", value));
+
+    vicii.regs[0x31] = value;
+}
+
 /* Store a value in a VIC-II register.  */
 void vicii_store(WORD addr, BYTE value)
 {
@@ -455,7 +472,13 @@ void vicii_store(WORD addr, BYTE value)
 
         case 0x2f:                /* $D02F: Unused */
         case 0x30:                /* $D030: Unused */
-        case 0x31:                /* $D031: Unused */
+            VICII_DEBUG_REGISTER(("(unused)"));
+            break;
+
+        case 0x31:                /* $D031: Extra Debug Register */
+            debug_d031_store(value);
+            break;
+
         case 0x32:                /* $D032: Unused */
         case 0x33:                /* $D033: Unused */
         case 0x34:                /* $D034: Unused */

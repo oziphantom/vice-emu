@@ -722,3 +722,34 @@ int vicii_dump(void)
 
     return 0;
 }
+
+int vicii_extradiss(void)
+{
+    mon_out("cyc:%d  line:%d", vicii.raster_cycle, vicii.raster_line);
+    return 0;
+}
+
+WORD* pCIA1Atimer = NULL;
+WORD* pCIA1Btimer = NULL;
+WORD* pCIA2Atimer = NULL;
+WORD* pCIA2Btimer = NULL;
+
+void vicii_setcia1timerAptr(WORD* ptimer)
+{
+    pCIA1Atimer = ptimer;
+}
+
+void vicii_setcia1timerBptr(WORD* ptimer)
+{
+    pCIA1Btimer = ptimer;
+}
+
+void vicii_setcia2timerAptr(WORD* ptimer)
+{
+    pCIA2Atimer = ptimer;
+}
+
+void vicii_setcia2timerBptr(WORD* ptimer)
+{
+    pCIA2Btimer = ptimer;
+}

@@ -31,6 +31,7 @@
 
 #include "raster.h"
 #include "types.h"
+#include "core\ciatimer.h" // Ozi debug crap
 
 /* Screen constants.  */
 #define VICII_SCREEN_XPIX                  320
@@ -258,6 +259,10 @@ struct vicii_s {
 typedef struct vicii_s vicii_t;
 
 extern vicii_t vicii;
+extern ciat_tstate_t* pCIA1Atimer;
+extern ciat_tstate_t* pCIA1Btimer;
+extern ciat_tstate_t* pCIA2Atimer;
+extern ciat_tstate_t* pCIA2Btimer;
 
 /* Private function calls, used by the other VIC-II modules.  */
 extern void vicii_raster_draw_handler(void);

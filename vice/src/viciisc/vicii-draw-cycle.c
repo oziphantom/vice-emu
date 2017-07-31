@@ -34,6 +34,10 @@
 #include "vicii-draw-cycle.h"
 #include "viciitypes.h"
 
+#include "c64interuptvisualiser.h"
+#include "c64\c64.h"
+#include "cia.h"
+
 /* disable for debugging */
 #define DRAW_INLINE inline
 
@@ -608,11 +612,54 @@ static DRAW_INLINE void draw_colors_8565(int offs, int i)
     lookup_index = i;
     /* resolve any unresolved colors */
 
-    /* special case for grey dot handling */
-    if (i == 0 && pixel_buffer[lookup_index] == last_color_reg) {
-        pixel_buffer[lookup_index] = 0x0f;
-    } else {
-        pixel_buffer[lookup_index] = cregs[pixel_buffer[lookup_index]];
+    if (irq_visualiser_is_enabled() == 1)
+    {
+       /* switch (irq_visualiser_get_current_state())
+        {
+        case irq_vis_mode_none:
+        default:
+            pixel_buffer[lookup_index] = 0;
+        }*/
+        int level = irq_visualiser_get_current_state() + 1;
+        if (level > 0)
+        {
+            pixel_buffer[lookup_index] = level;
+        }
+        else
+        {
+            pixel_buffer[lookup_index] = cregs[pixel_buffer[lookup_index]];
+        }            
+    }
+    else
+    {
+        /* special case for grey dot handling */
+        if (i == 0 && pixel_buffer[lookup_index] == last_color_reg) {
+            pixel_buffer[lookup_index] = 0x0f;
+        }
+        else {
+            pixel_buffer[lookup_index] = cregs[pixel_buffer[lookup_index]];
+        }
+    }
+
+    if (lookup_index==1)
+    {
+        WORD lo = ciacore_peek(machine_context.cia2, 0x04);
+        WORD hi = ciacore_peek(machine_context.cia2, 0x05) << 8;
+        WORD value = lo + hi;
+        if (value == 1)
+        {
+            pixel_buffer[lookup_index] = 7;
+        }
+    }
+    if (lookup_index == 2)
+    {
+        WORD lo = ciacore_peek(machine_context.cia2, 0x06);
+        WORD hi = ciacore_peek(machine_context.cia2, 0x07) << 8;
+        WORD value = lo + hi;
+        if (value == 1)
+        {
+            pixel_buffer[lookup_index] = 10;
+        }
     }
 
     /* draw pixel to buffer */

@@ -38,6 +38,7 @@
 #define CPU_STR "Main CPU"
 
 #include "traps.h"
+#include "c64interuptvisualiser.h"
 
 #ifndef C64DTV
 /* The C64DTV can use different shadow registers for accu read/write. */
@@ -244,6 +245,7 @@
         if (TRACEFLG) {                     \
             debug_nmi(CPU_INT_STATUS, CLK); \
         }                                   \
+        irq_visualiser_push_NMI();          \
     } while (0)
 
 #define TRACE_IRQ()                         \
@@ -251,6 +253,7 @@
         if (TRACEFLG) {                     \
             debug_irq(CPU_INT_STATUS, CLK); \
         }                                   \
+        irq_visualiser_push_IRQ();          \
     } while (0)
 
 #define TRACE_BRK()                \
@@ -260,8 +263,8 @@
         }                          \
     } while (0)
 #else
-#define TRACE_NMI()
-#define TRACE_IRQ()
+#define TRACE_NMI()  irq_visualiser_push_NMI();
+#define TRACE_IRQ()  irq_visualiser_push_IRQ();
 #define TRACE_BRK()
 #endif
 
@@ -370,6 +373,8 @@
             if (ik & IK_RESET) {                                               \
                 interrupt_ack_reset(CPU_INT_STATUS);                           \
                 cpu_reset();                                                   \
+                irq_visualiser_reset();                                        \
+                irq_viusaliser_disable();                                      \
                 addr = LOAD(0xfffc);                                           \
                 addr |= (LOAD(0xfffd) << 8);                                   \
                 bank_start = bank_limit = 0; /* prevent caching */             \
@@ -1887,8 +1892,9 @@ trap_skipped:
                 RLA(3, GET_ABS_X_RMW, SET_ABS_X_RMW);
                 break;
 
-            case 0x40:          /* RTI */
+            case 0x40:          /* RTI */                
                 RTI();
+                irq_visualiser_pull();
                 break;
 
             case 0x41:          /* EOR ($nn,X) */

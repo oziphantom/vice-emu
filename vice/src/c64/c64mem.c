@@ -64,6 +64,8 @@
 #include "vicii-phi1.h"
 #include "vicii.h"
 
+#define FEATURE_CPUMEMHISTORY
+
 /* Machine class (moved from c64.c to distinguish between x64 and x64sc) */
 int machine_class = VICE_MACHINE_C64;
 
@@ -1125,8 +1127,8 @@ mem_ioreg_list_t *mem_ioreg_list_get(void *context)
 {
     mem_ioreg_list_t *mem_ioreg_list = NULL;
 
-    mon_ioreg_add_list(&mem_ioreg_list, "CIA1", 0xdc00, 0xdc0f, mem_dump_io, NULL);
-    mon_ioreg_add_list(&mem_ioreg_list, "CIA2", 0xdd00, 0xdd0f, mem_dump_io, NULL);
+    mon_ioreg_add_list(&mem_ioreg_list, "CIA1", 0xdc00, 0xdc0f, mem_dump_io, NULL,NULL);
+    mon_ioreg_add_list(&mem_ioreg_list, "CIA2", 0xdd00, 0xdd0f, mem_dump_io, NULL,NULL);
 
     io_source_ioreg_add_list(&mem_ioreg_list);
 
