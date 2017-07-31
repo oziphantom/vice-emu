@@ -28,6 +28,10 @@
 #ifndef VICE_SCREENSHOT_H
 #define VICE_SCREENSHOT_H
 
+#ifndef FEATURE_CPUMEMHISTORY
+#define FEATURE_CPUMEMHISTORY
+#endif 
+
 #include <stdio.h>
 
 #include "types.h"

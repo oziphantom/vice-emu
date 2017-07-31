@@ -31,7 +31,7 @@
 #include "cpmcart.h"
 #include "monitor.h"
 #include "vicii-cycle.h"
-
+#define FEATURE_CPUMEMHISTORY
 /* ------------------------------------------------------------------------- */
 
 /* Global clock counter.  */

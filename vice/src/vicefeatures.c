@@ -37,6 +37,7 @@
 #if !defined(__OS2__) && !defined(BEOS_COMPILE) && !defined(__MSDOS__) && !defined(AMIGA_SUPPORT) && !defined(WIN32)
 #define UNIX
 #endif
+#define FEATURE_CPUMEMHISTORY
 
 static feature_list_t featurelist[] = {
 #ifdef UNIX /* unix */

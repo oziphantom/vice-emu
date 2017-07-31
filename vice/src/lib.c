@@ -62,9 +62,9 @@
 
 #ifdef DEBUG
 /* enable memory debugging */
-# define LIB_DEBUG
+//# define LIB_DEBUG
 /* enable pinpointing of memory leaks, don't forget to enable in lib.h */
-# define LIB_DEBUG_PINPOINT
+//# define LIB_DEBUG_PINPOINT
 /* warn on free(NULL) */
 /* #define LIB_DEBUG_WARN_FREE_NULL */
 # ifdef HAVE_BT_SYMBOLS

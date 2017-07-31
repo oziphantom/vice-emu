@@ -30,6 +30,7 @@
 
 #include "cpmcart.h"
 
+#define FEATURE_CPUMEMHISTORY
 #ifdef FEATURE_CPUMEMHISTORY
 #include "monitor.h"
 #include "c64pla.h"

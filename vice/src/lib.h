@@ -38,7 +38,7 @@
 
 #ifdef DEBUG
 /* memory leak pinpointing, don't forget to enable in lib.c */
-#define LIB_DEBUG_PINPOINT
+//#define LIB_DEBUG_PINPOINT
 #endif
 
 extern void lib_init_rand(void);

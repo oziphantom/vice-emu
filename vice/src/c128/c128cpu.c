@@ -35,6 +35,7 @@
 #include "viciitypes.h"
 #include "z80.h"
 
+#define FEATURE_CPUMEMHISTORY
 #ifdef FEATURE_CPUMEMHISTORY
 #include "monitor.h"
 #endif
@@ -120,7 +121,7 @@ static void clk_overflow_callback(CLOCK sub, void *unused_data)
 #define CPU_ADDITIONAL_INIT() clk_guard_add_callback(maincpu_clk_guard, clk_overflow_callback, NULL)
 
 #ifdef FEATURE_CPUMEMHISTORY
-#warning "CPUMEMHISTORY implementation for x128 is incomplete"
+//#warning "CPUMEMHISTORY implementation for x128 is incomplete"
 void memmap_mem_store(unsigned int addr, unsigned int value)
 {
     monitor_memmap_store(addr, MEMMAP_RAM_W);

@@ -83,7 +83,7 @@
     } while (0)
 
 /* ------------------------------------------------------------------------- */
-
+#define FEATURE_CPUMEMHISTORY
 #ifdef FEATURE_CPUMEMHISTORY
 #ifndef C64DTV /* FIXME: fix DTV and remove this */
 
